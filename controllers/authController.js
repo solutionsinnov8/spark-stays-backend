@@ -1,11 +1,9 @@
-const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Register
-router.post('/register', async (req, res) => {
+// Register Controller
+const registerUser = async (req, res) => {
   const { fullName, email, password, role } = req.body;
   try {
     const existingUser = await User.findOne({ email });
@@ -19,14 +17,15 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error registering user' });
   }
-});
+};
 
-// Login
-router.post('/login', async (req, res) => {
+// Login Controller
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
+    console.log(req.body, "ooooooooooooooo");
+    
   try {
-    // 👉 Hardcoded Admin Check
+    // 👉 Admin login check
     if (email === 'admin@gmail.com' && password === '1234') {
       const adminUser = {
         fullName: 'Admin',
@@ -52,10 +51,16 @@ router.post('/login', async (req, res) => {
       expiresIn: '1d'
     });
 
-    res.status(200).json({ token, user: { fullName: user.fullName, role: user.role } });
+    res.status(200).json({
+      token,
+      user: { fullName: user.fullName, role: user.role, email: user.email }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Login failed' });
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  registerUser,
+  loginUser,
+};
