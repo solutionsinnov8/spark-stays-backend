@@ -6,7 +6,7 @@ const packageSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   duration: { type: Number, required: true },
   description: { type: String, required: true },
-  planner: { type: String, required: true },
+  planner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, {
   timestamps: true,
 });

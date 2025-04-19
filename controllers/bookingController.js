@@ -1,4 +1,5 @@
 const Booking = require('../models/bookingModel');
+const Package = require('../models/Package');
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
@@ -8,6 +9,26 @@ exports.createBooking = async (req, res) => {
     res.status(201).json(booking);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+exports.getMyBookings = async (req, res) => {
+  try {
+    if (req.user.role !== 'event_planner') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Fix here
+    const myPackages = await Package.find({ planner: req.user._id });
+    const myPackageIds = myPackages.map(pkg => pkg._id);
+    console.log(req.user._id, "00000000000000");
+    console.log("My Packages:", myPackages);
+    const bookings = await Booking.find({ packageId: { $in: myPackageIds } })
+      .populate('packageId'); // You can remove userId since it's not in model
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error getting my bookings:', error);
+    res.status(500).json({ message: 'Failed to get bookings' });
   }
 };
 
