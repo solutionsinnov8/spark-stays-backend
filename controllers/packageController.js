@@ -13,8 +13,16 @@ const createPackage = async (req, res) => {
     res.status(500).json({ message: "Failed to create package" });
   }
 };
-
 const getAllPackages = async (req, res) => {
+  try {
+    const packages = await Package.find();
+    res.status(200).json(packages);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching packages" });
+  }
+};
+
+const getPlannerPackages = async (req, res) => {
   try {
     const packages = await Package.find({ planner: req.user._id });
     res.status(200).json(packages);
@@ -24,5 +32,4 @@ const getAllPackages = async (req, res) => {
   }
 };
 
-
-module.exports = { createPackage, getAllPackages };
+module.exports = { createPackage, getAllPackages, getPlannerPackages };
