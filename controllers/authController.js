@@ -67,7 +67,51 @@ const loginUser = async (req, res) => {
 };
 
 
+// Update Profile
+const updateProfile = async (req, res) => {
+  const userId =  req.user._id; 
+  const { name, email } = req.body;
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { fullName: name, email },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Failed to update profile' });
+  }
+};
+
+// Delete Account
+const deleteAccount = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ message: 'Failed to delete account' });
+  }
+};
+
+
+
 module.exports = {
   registerUser,
   loginUser,
+  updateProfile,
+  deleteAccount
 };

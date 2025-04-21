@@ -20,8 +20,6 @@ exports.getMyBookings = async (req, res) => {
     // Fix here
     const myPackages = await Package.find({ planner: req.user._id });
     const myPackageIds = myPackages.map(pkg => pkg._id);
-    console.log(req.user._id, "00000000000000");
-    console.log("My Packages:", myPackages);
     const bookings = await Booking.find({ packageId: { $in: myPackageIds } })
       .populate('packageId'); // You can remove userId since it's not in model
 
