@@ -47,6 +47,11 @@ const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
+    // ✅ Event planner login should only work if approved
+    if (user.role === 'event_planner' && user.status !== 'approved') {
+      return res.status(403).json({ message: 'Your account is not approved yet' });
+    }
+
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1d'
     });
@@ -65,6 +70,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Login failed' });
   }
 };
+
 
 
 // Update Profile
@@ -107,11 +113,43 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const getAllEventPlanner = async (req, res) => {
+  try {
+    const planners = await User.find({ role: 'event_planner' });
+    res.status(200).json(planners); // Respond with the list of planners
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch event planners' }); // Send error response
+  }
+};
+
+const updatePlannerStatus = async (req, res) => {
+  const { id, status } = req.body; 
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { status }, 
+      { new: true } 
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: `Planner ${status} successfully`, user: updatedUser });
+  } catch (error) {
+    console.error('Error updating planner status:', error);
+    res.status(500).json({ message: 'Failed to update planner status' });
+  }
+};
+
 
 
 module.exports = {
   registerUser,
   loginUser,
   updateProfile,
-  deleteAccount
+  deleteAccount, 
+  getAllEventPlanner,
+  updatePlannerStatus
 };

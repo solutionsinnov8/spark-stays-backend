@@ -12,17 +12,29 @@ const authenticateUser = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded Token:", decoded);
+
+    // Special case for admin
+    if (decoded.userId === 'admin-id' && decoded.role === 'admin') {
+      req.user = { _id: 'admin-id', role: 'admin', fullName: 'Admin' };
+      return next();
+    }
+
+    // Regular user check
     const user = await User.findById(decoded.userId).select('-password');
+    console.log("User Found:", user);
 
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized: User not found' });
     }
 
-    req.user = user; // 🎯 You now have access to req.user._id, req.user.role, etc.
+    req.user = user;
     next();
   } catch (error) {
+    console.error("Token Verification Error:", error);
     return res.status(401).json({ message: 'Unauthorized: Invalid token' });
   }
 };
+
 
 module.exports = authenticateUser;
